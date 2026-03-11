@@ -136,6 +136,8 @@
   body {
     @apply bg-background text-foreground;
     position: relative;
+    min-height: 100%;
+    background-color: var(--background) !important;
     background-image: radial-gradient(
         1200px 600px at 10% -10%,
         oklch(0.32 0.12 200 / 35%),
@@ -152,6 +154,7 @@
         transparent 60%
       );
     background-attachment: fixed;
+    background-repeat: no-repeat;
   }
   body::before,
   body::after {
@@ -187,6 +190,8 @@
   }
   html {
     @apply font-sans;
+    min-height: 100%;
+    background-color: var(--background);
   }
 }
 

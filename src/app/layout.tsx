@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className="font-sans antialiased">
+      <body className="bg-background text-foreground font-sans antialiased">
         <TooltipProvider>{children}</TooltipProvider>
       </body>
     </html>
