@@ -72,6 +72,12 @@ db.exec(`
     context_json TEXT,
     created_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT,
+    updated_at TEXT NOT NULL
+  );
 `);
 
 if (!globalForDb.__tsAgenticDb) {

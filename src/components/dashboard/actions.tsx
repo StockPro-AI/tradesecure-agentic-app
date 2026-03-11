@@ -3,7 +3,14 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -168,6 +175,140 @@ export function QueueTradeDialog() {
             {pending ? "Queuing..." : "Add to Queue"}
           </Button>
         </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+type AssistantSettingsSnapshot = {
+  provider: string;
+  model: string;
+  baseUrl: string | null;
+  hasApiKey: boolean;
+  mode: string;
+};
+
+export function SettingsDialog({
+  initial,
+  loginEnabled = false,
+}: {
+  initial: AssistantSettingsSnapshot;
+  loginEnabled?: boolean;
+}) {
+  const { pending, run } = useAction();
+  const [open, setOpen] = useState(false);
+  const [provider, setProvider] = useState(initial.provider);
+  const [model, setModel] = useState(initial.model);
+  const [baseUrl, setBaseUrl] = useState(initial.baseUrl ?? "");
+  const [apiKey, setApiKey] = useState("");
+  const [hasApiKey, setHasApiKey] = useState(initial.hasApiKey);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">Settings</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Assistant & Model Settings</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 text-sm">
+          <div className="grid gap-2">
+            <span className="text-xs text-muted-foreground">Provider</span>
+            <Input
+              value={provider}
+              onChange={(event) => setProvider(event.target.value)}
+              placeholder="openai"
+            />
+          </div>
+          <div className="grid gap-2">
+            <span className="text-xs text-muted-foreground">Model</span>
+            <Input
+              value={model}
+              onChange={(event) => setModel(event.target.value)}
+              placeholder="gpt-4o-mini"
+            />
+          </div>
+          <div className="grid gap-2">
+            <span className="text-xs text-muted-foreground">Base URL (optional)</span>
+            <Input
+              value={baseUrl}
+              onChange={(event) => setBaseUrl(event.target.value)}
+              placeholder="https://api.openai.com/v1"
+            />
+          </div>
+          <div className="grid gap-2">
+            <span className="text-xs text-muted-foreground">API Key</span>
+            <Input
+              type="password"
+              value={apiKey}
+              onChange={(event) => setApiKey(event.target.value)}
+              placeholder={hasApiKey ? "Stored (enter to replace)" : "sk-..."}
+            />
+            <span className="text-xs text-muted-foreground">
+              Mode: {initial.mode === "mock" ? "Mock" : "Live"}
+            </span>
+          </div>
+        </div>
+        <DialogFooter className="gap-2">
+          {loginEnabled ? (
+            <Button
+              variant="ghost"
+              disabled={pending}
+              onClick={() =>
+                run(async () => {
+                  await fetch("/api/auth/logout", { method: "POST" });
+                  window.location.href = "/login";
+                })
+              }
+            >
+              Sign out
+            </Button>
+          ) : null}
+          {hasApiKey ? (
+            <Button
+              variant="outline"
+              disabled={pending}
+              onClick={() =>
+                run(async () => {
+                  await fetch("/api/settings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ clearApiKey: true }),
+                  });
+                  setHasApiKey(false);
+                  setApiKey("");
+                })
+              }
+            >
+              Clear Key
+            </Button>
+          ) : null}
+          <Button
+            disabled={pending}
+            onClick={() =>
+              run(async () => {
+                await fetch("/api/settings", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    provider,
+                    model,
+                    baseUrl,
+                    apiKey,
+                  }),
+                });
+                if (apiKey.trim()) {
+                  setHasApiKey(true);
+                  setApiKey("");
+                }
+                setOpen(false);
+              })
+            }
+          >
+            {pending ? "Saving..." : "Save Settings"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -53,7 +53,102 @@ export type SystemEvent = {
   created_at: string;
 };
 
+export type AssistantSettings = {
+  provider: string;
+  model: string;
+  base_url: string | null;
+  api_key: string | null;
+};
+
+export type AssistantSettingsSafe = {
+  provider: string;
+  model: string;
+  baseUrl: string | null;
+  hasApiKey: boolean;
+  mode: string;
+};
+
 const nowIso = () => new Date().toISOString();
+const assistantSettingKeys = {
+  provider: "assistant.provider",
+  model: "assistant.model",
+  baseUrl: "assistant.base_url",
+  apiKey: "assistant.api_key",
+};
+
+function getSettingValue(key: string) {
+  const row = db
+    .prepare("SELECT value FROM settings WHERE key = ?")
+    .get(key) as { value: string } | undefined;
+  return row?.value ?? null;
+}
+
+function setSettingValue(key: string, value: string | null) {
+  if (value === null || value === undefined || value === "") {
+    db.prepare("DELETE FROM settings WHERE key = ?").run(key);
+    return;
+  }
+
+  db.prepare(
+    `INSERT INTO settings (key, value, updated_at)
+     VALUES (?, ?, ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`
+  ).run(key, value, nowIso());
+}
+
+export function getAssistantSettings(): AssistantSettings {
+  return {
+    provider:
+      getSettingValue(assistantSettingKeys.provider) ??
+      process.env.TS_ASSISTANT_PROVIDER ??
+      "openai",
+    model:
+      getSettingValue(assistantSettingKeys.model) ??
+      process.env.TS_ASSISTANT_MODEL ??
+      "gpt-4o-mini",
+    base_url:
+      getSettingValue(assistantSettingKeys.baseUrl) ??
+      process.env.TS_ASSISTANT_BASE_URL ??
+      null,
+    api_key:
+      getSettingValue(assistantSettingKeys.apiKey) ??
+      process.env.OPENAI_API_KEY ??
+      null,
+  };
+}
+
+export function getAssistantSettingsSafe(): AssistantSettingsSafe {
+  const settings = getAssistantSettings();
+  return {
+    provider: settings.provider,
+    model: settings.model,
+    baseUrl: settings.base_url,
+    hasApiKey: Boolean(settings.api_key),
+    mode: process.env.TS_ASSISTANT_MODE ?? "mock",
+  };
+}
+
+export function updateAssistantSettings(input: Partial<AssistantSettings>) {
+  if (input.provider !== undefined) {
+    setSettingValue(assistantSettingKeys.provider, input.provider);
+  }
+  if (input.model !== undefined) {
+    setSettingValue(assistantSettingKeys.model, input.model);
+  }
+  if (input.base_url !== undefined) {
+    setSettingValue(assistantSettingKeys.baseUrl, input.base_url);
+  }
+  if (input.api_key !== undefined) {
+    setSettingValue(assistantSettingKeys.apiKey, input.api_key);
+  }
+
+  logEvent("info", "Assistant settings updated", {
+    provider: input.provider,
+    model: input.model,
+    baseUrl: input.base_url ? true : undefined,
+    apiKeyUpdated: input.api_key ? true : undefined,
+  });
+}
 
 export function logEvent(
   level: SystemEvent["level"],

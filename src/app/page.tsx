@@ -8,9 +8,11 @@ import {
   QueueTradeDialog,
   RejectExecutionButton,
   RunBacktestButton,
+  SettingsDialog,
   SnapshotButton,
 } from "@/components/dashboard/actions";
 import { AssistantChat } from "@/components/dashboard/assistant-chat";
+import { getAssistantSettingsSafe } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -42,6 +44,8 @@ export default function Home() {
     (item) => item.status === "pending_human"
   ).length;
   const latestSnapshot = dashboard.market[0]?.captured_at ?? "No snapshot yet";
+  const assistantSettings = getAssistantSettingsSafe();
+  const loginEnabled = Boolean(process.env.DASHBOARD_PASSWORD);
 
   return (
     <div className="min-h-screen px-6 py-10 lg:px-10">
@@ -59,6 +63,7 @@ export default function Home() {
         <div className="flex flex-wrap items-center gap-3">
           <SnapshotButton />
           <QueueTradeDialog />
+          <SettingsDialog initial={assistantSettings} loginEnabled={loginEnabled} />
         </div>
       </header>
 
@@ -282,6 +287,11 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <AssistantChat />
+              {!assistantSettings.hasApiKey && assistantSettings.mode !== "mock" ? (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Configure an API key in Settings to enable live model responses.
+                </p>
+              ) : null}
             </CardContent>
           </Card>
 
