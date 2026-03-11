@@ -15,16 +15,17 @@ export async function POST(req: Request) {
   const dashboard = getDashboardData();
   const pending = dashboard.queue.filter((item) => item.status === "pending_human");
   const settings = getAssistantSettings();
-  const assistantMode = process.env.TS_ASSISTANT_MODE ?? "mock";
+  const assistantMode = settings.mode ?? "auto";
 
   const { stream, onText, onEnd, onError, onLLMEnd } = crayonStream();
 
   try {
     const providerSupported = settings.provider === "openai";
+    const hasApiKey = Boolean(settings.api_key);
     const shouldUseMock =
-      assistantMode === "mock" || !settings.api_key || !providerSupported;
+      assistantMode === "mock" || !providerSupported || !hasApiKey;
     if (shouldUseMock) {
-      if (assistantMode !== "mock" && (!settings.api_key || !providerSupported)) {
+      if (assistantMode !== "mock" && (!hasApiKey || !providerSupported)) {
         const reason = !providerSupported
           ? "The selected provider is not supported yet."
           : "Live mode is enabled but no API key is configured.";

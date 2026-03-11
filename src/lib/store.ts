@@ -58,6 +58,7 @@ export type AssistantSettings = {
   model: string;
   base_url: string | null;
   api_key: string | null;
+  mode: string;
 };
 
 export type AssistantSettingsSafe = {
@@ -74,6 +75,7 @@ const assistantSettingKeys = {
   model: "assistant.model",
   baseUrl: "assistant.base_url",
   apiKey: "assistant.api_key",
+  mode: "assistant.mode",
 };
 
 function getSettingValue(key: string) {
@@ -114,6 +116,10 @@ export function getAssistantSettings(): AssistantSettings {
       getSettingValue(assistantSettingKeys.apiKey) ??
       process.env.OPENAI_API_KEY ??
       null,
+    mode:
+      getSettingValue(assistantSettingKeys.mode) ??
+      process.env.TS_ASSISTANT_MODE ??
+      "auto",
   };
 }
 
@@ -124,7 +130,7 @@ export function getAssistantSettingsSafe(): AssistantSettingsSafe {
     model: settings.model,
     baseUrl: settings.base_url,
     hasApiKey: Boolean(settings.api_key),
-    mode: process.env.TS_ASSISTANT_MODE ?? "mock",
+    mode: settings.mode,
   };
 }
 
@@ -141,12 +147,16 @@ export function updateAssistantSettings(input: Partial<AssistantSettings>) {
   if (input.api_key !== undefined) {
     setSettingValue(assistantSettingKeys.apiKey, input.api_key);
   }
+  if (input.mode !== undefined) {
+    setSettingValue(assistantSettingKeys.mode, input.mode);
+  }
 
   logEvent("info", "Assistant settings updated", {
     provider: input.provider,
     model: input.model,
     baseUrl: input.base_url ? true : undefined,
     apiKeyUpdated: input.api_key ? true : undefined,
+    mode: input.mode,
   });
 }
 

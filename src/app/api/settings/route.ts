@@ -19,6 +19,8 @@ export async function POST(req: Request) {
     typeof body.baseUrl === "string" ? body.baseUrl.trim() : undefined;
   const apiKeyRaw =
     typeof body.apiKey === "string" ? body.apiKey.trim() : undefined;
+  const modeRaw =
+    typeof body.mode === "string" ? body.mode.trim().toLowerCase() : undefined;
   const clearApiKey = Boolean(body.clearApiKey);
 
   updateAssistantSettings({
@@ -26,6 +28,10 @@ export async function POST(req: Request) {
     model: modelRaw === "" ? undefined : modelRaw,
     base_url: baseUrlRaw === undefined ? undefined : baseUrlRaw || null,
     api_key: clearApiKey ? null : apiKeyRaw,
+    mode:
+      modeRaw === "mock" || modeRaw === "auto" || modeRaw === "live"
+        ? modeRaw
+        : undefined,
   });
 
   return NextResponse.json(getAssistantSettingsSafe());

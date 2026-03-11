@@ -200,6 +200,7 @@ export function SettingsDialog({
   const [provider, setProvider] = useState(initial.provider);
   const [model, setModel] = useState(initial.model);
   const [baseUrl, setBaseUrl] = useState(initial.baseUrl ?? "");
+  const [mode, setMode] = useState(initial.mode);
   const [apiKey, setApiKey] = useState("");
   const [hasApiKey, setHasApiKey] = useState(initial.hasApiKey);
 
@@ -220,6 +221,16 @@ export function SettingsDialog({
               onChange={(event) => setProvider(event.target.value)}
               placeholder="openai"
             />
+          </div>
+          <div className="grid gap-2">
+            <span className="text-xs text-muted-foreground">Mode</span>
+            <Tabs value={mode} onValueChange={(value) => setMode(value)}>
+              <TabsList className="grid grid-cols-3">
+                <TabsTrigger value="mock">Mock</TabsTrigger>
+                <TabsTrigger value="auto">Auto</TabsTrigger>
+                <TabsTrigger value="live">Live</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
           <div className="grid gap-2">
             <span className="text-xs text-muted-foreground">Model</span>
@@ -246,7 +257,7 @@ export function SettingsDialog({
               placeholder={hasApiKey ? "Stored (enter to replace)" : "sk-..."}
             />
             <span className="text-xs text-muted-foreground">
-              Mode: {initial.mode === "mock" ? "Mock" : "Live"}
+              Mode: {mode}
             </span>
           </div>
         </div>
@@ -294,6 +305,7 @@ export function SettingsDialog({
                   body: JSON.stringify({
                     provider,
                     model,
+                    mode,
                     baseUrl,
                     apiKey,
                   }),
