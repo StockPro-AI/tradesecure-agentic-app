@@ -1,65 +1,312 @@
-import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getDashboardData } from "@/lib/store";
+import {
+  ApproveExecutionButton,
+  CreateStrategyForm,
+  QueueTradeDialog,
+  RejectExecutionButton,
+  RunBacktestButton,
+  SnapshotButton,
+} from "@/components/dashboard/actions";
+import { AssistantChat } from "@/components/dashboard/assistant-chat";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
+const formatNumber = (value?: number | null) =>
+  typeof value === "number" ? value.toLocaleString("en-US") : "NA";
+const formatPct = (value?: number | null) =>
+  typeof value === "number" ? `${(value * 100).toFixed(2)}%` : "NA";
+
+const statusBadge = (status: string) => {
+  const base = "uppercase tracking-wide";
+  switch (status) {
+    case "approved":
+      return <Badge className={base}>Approved</Badge>;
+    case "executed":
+      return <Badge className={`${base} bg-emerald-600 text-white`}>Executed</Badge>;
+    case "failed":
+      return <Badge className={`${base} bg-rose-600 text-white`}>Failed</Badge>;
+    case "rejected":
+      return <Badge variant="outline" className={base}>Rejected</Badge>;
+    default:
+      return <Badge variant="secondary" className={base}>Pending</Badge>;
+  }
+};
 
 export default function Home() {
+  const dashboard = getDashboardData();
+  const pendingApprovals = dashboard.queue.filter(
+    (item) => item.status === "pending_human"
+  ).length;
+  const latestSnapshot = dashboard.market[0]?.captured_at ?? "No snapshot yet";
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen px-6 py-10 lg:px-10">
+      <header className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3">
+          <Badge className="w-fit bg-black text-white">Demo Control Room</Badge>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+            TradeSecure Agentic Control
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            UI-only monitoring, research workflows, and human-in-the-loop execution for a
+            demo environment. No external market data is used.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="flex flex-wrap items-center gap-3">
+          <SnapshotButton />
+          <QueueTradeDialog />
         </div>
-      </main>
+      </header>
+
+      <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+        <div className="flex flex-col gap-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card className="bg-white/70">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-muted-foreground">Pending Approvals</CardTitle>
+              </CardHeader>
+              <CardContent className="text-2xl font-semibold">{pendingApprovals}</CardContent>
+            </Card>
+            <Card className="bg-white/70">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-muted-foreground">Active Strategies</CardTitle>
+              </CardHeader>
+              <CardContent className="text-2xl font-semibold">
+                {dashboard.strategies.length}
+              </CardContent>
+            </Card>
+            <Card className="bg-white/70">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-muted-foreground">Last Snapshot</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm font-semibold">{latestSnapshot}</CardContent>
+            </Card>
+          </div>
+
+          <Card className="bg-white/80">
+            <CardHeader>
+              <CardTitle>Market Monitor</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Symbol</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Change</TableHead>
+                    <TableHead>Volume</TableHead>
+                    <TableHead>Source</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dashboard.market.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
+                        No UI snapshots yet.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    dashboard.market.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell className="font-medium">{row.symbol}</TableCell>
+                        <TableCell>{formatNumber(row.price)}</TableCell>
+                        <TableCell>{formatPct(row.change_pct)}</TableCell>
+                        <TableCell>{formatNumber(row.volume)}</TableCell>
+                        <TableCell className="text-xs uppercase text-muted-foreground">
+                          {row.source}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80">
+            <CardHeader>
+              <CardTitle>Strategy Factory</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+              <div className="flex flex-col gap-3">
+                <p className="text-sm text-muted-foreground">
+                  Capture a hypothesis, then run a mock backtest to evaluate the signal.
+                </p>
+                <CreateStrategyForm />
+              </div>
+              <div className="space-y-3">
+                {dashboard.strategies.map((strategy) => (
+                  <div
+                    key={strategy.id}
+                    className="rounded-xl border border-border/60 bg-white/70 p-4"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold">{strategy.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {strategy.hypothesis}
+                        </p>
+                      </div>
+                      <RunBacktestButton strategyId={strategy.id} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80">
+            <CardHeader>
+              <CardTitle>Execution Queue</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Symbol</TableHead>
+                    <TableHead>Side</TableHead>
+                    <TableHead>Qty</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+              <TableBody>
+                {dashboard.queue.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
+                      No execution intents queued.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  dashboard.queue.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">{item.symbol}</TableCell>
+                      <TableCell className="uppercase">{item.side}</TableCell>
+                      <TableCell>{item.qty}</TableCell>
+                      <TableCell>{statusBadge(item.status)}</TableCell>
+                      <TableCell className="flex items-center gap-2">
+                        {item.status === "pending_human" ? (
+                          <>
+                            <ApproveExecutionButton id={item.id} />
+                            <RejectExecutionButton id={item.id} />
+                          </>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Locked</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+          <Card className="bg-white/80">
+            <CardHeader>
+              <CardTitle>Backtest Runs</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {dashboard.backtests.length === 0 ? (
+                <div className="text-sm text-muted-foreground">
+                  No backtests yet. Run one from the Strategy Factory.
+                </div>
+              ) : (
+                dashboard.backtests.map((run) => {
+                  const metrics = JSON.parse(run.metrics_json);
+                  return (
+                    <div
+                      key={run.id}
+                      className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border/50 bg-white/70 p-4 text-sm"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-xs uppercase text-muted-foreground">
+                          Strategy {run.strategy_id.slice(0, 6)}
+                        </span>
+                        <span className="font-medium">Sharpe {metrics.sharpe}</span>
+                      </div>
+                      <div className="flex gap-4">
+                        <span>Max DD {metrics.max_dd}</span>
+                        <span>Win {metrics.win_rate}</span>
+                        <span>Trades {metrics.total_trades}</span>
+                      </div>
+                      <Badge
+                        className={
+                          run.status === "pass"
+                            ? "bg-emerald-600 text-white"
+                            : "bg-amber-500 text-white"
+                        }
+                      >
+                        {run.status.toUpperCase()}
+                      </Badge>
+                    </div>
+                  );
+                })
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <Card className="bg-white/85">
+            <CardHeader>
+              <CardTitle>Agent Status</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+                <span>Market Watcher</span>
+                <Badge variant="secondary">Running</Badge>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+                <span>Strategy Factory</span>
+                <Badge variant="outline">Idle</Badge>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+                <span>Execution Agent</span>
+                <Badge variant="secondary">Awaiting Approval</Badge>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+                <span>Risk Guardian</span>
+                <Badge className="bg-black text-white">On Watch</Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/85">
+            <CardHeader>
+              <CardTitle>Assistant Console</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AssistantChat />
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/85">
+            <CardHeader>
+              <CardTitle>Event Stream</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-xs text-muted-foreground">
+              {dashboard.events.length === 0 ? (
+                <div>No events yet.</div>
+              ) : (
+                dashboard.events.map((event) => (
+                  <div key={event.id} className="flex items-start gap-2">
+                    <span className="mt-0.5 h-2 w-2 rounded-full bg-primary" />
+                    <div>
+                      <p className="font-medium text-foreground">{event.message}</p>
+                      <p>{event.created_at}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </section>
     </div>
   );
 }

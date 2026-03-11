@@ -1,0 +1,19 @@
+{
+  "marketTable": {
+    "row": ".market-row",
+    "fields": {
+      "symbol": ".market-symbol",
+      "price": ".market-price",
+      "changePct": ".market-change",
+      "volume": ".market-volume"
+    }
+  },
+  "orderForm": {
+    "symbolInput": "input[name='symbol']",
+    "qtyInput": "input[name='qty']",
+    "sideBuyButton": "button[data-side='buy']",
+    "sideSellButton": "button[data-side='sell']",
+    "submitButton": "button[data-action='submit']",
+    "confirmButton": "button[data-action='confirm']"
+  }
+}

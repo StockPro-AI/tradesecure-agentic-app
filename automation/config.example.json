@@ -1,0 +1,14 @@
+{
+  "baseUrl": "https://webtrader.tradesecure.io/",
+  "dashboardUrl": "http://localhost:3000",
+  "headless": false,
+  "slowMo": 80,
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "storageStatePath": "./data/automation/storage.json",
+  "selectorsPath": "./automation/selectors.json",
+  "postLoginSelector": null,
+  "executeTrades": false
+}
