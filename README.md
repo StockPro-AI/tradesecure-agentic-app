@@ -21,6 +21,17 @@ See `automation/README.md` for Playwright setup and selector mapping.
 - `npm run automation:execute -- --id <execution_id>`
 - `npm run worker:run`
 
+## Automation Login
+1. Lege eine `.env` an (siehe `.env.example`).
+2. Führe `npm install` aus.
+3. Starte `npm run automation:login`.
+4. Die Session wird unter `.local/session.json` gespeichert.
+
+## API Manager
+- Öffne den API-Manager im TradeSecure-Login-Panel.
+- Lege Schlüssel lokal an (OpenAI, Ollama, Anthropic, Custom).
+- Nutze den Verbindungstest, um den Provider zu prüfen (CORS kann den Browser-Test blockieren).
+
 ## Notes
 - Execution defaults to disabled. Set `TS_AUTOMATION_EXECUTE=true` to allow UI submission.
 - The assistant uses mock responses by default.

@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "node scripts/patch-lucide.mjs",
-    "automation:login": "node automation/login.mjs",
+    "automation:login": "node ./scripts/automation-login.js",
     "automation:snapshot": "node automation/snapshot.mjs",
     "automation:discover": "node automation/discover.mjs",
     "automation:execute": "node automation/execute.mjs",

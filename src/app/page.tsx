@@ -12,6 +12,7 @@ import {
   SnapshotButton,
 } from "@/components/dashboard/actions";
 import { AssistantChat } from "@/components/dashboard/assistant-chat";
+import ApiManager from "@/components/ApiManager";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -265,7 +266,7 @@ export default function Home() {
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>TradeSecure Login</CardTitle>
+              <CardTitle>TradeSecure-Login</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2">
@@ -276,19 +277,20 @@ export default function Home() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Open Login
+                  Login öffnen
                 </a>
               </div>
               <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                <span>Automation Session</span>
+                <span>Automations-Session</span>
                 <Badge variant={automationStatus.hasSession ? "secondary" : "outline"}>
-                  {automationStatus.hasSession ? "Captured" : "Missing"}
+                  {automationStatus.hasSession ? "Erfasst" : "Fehlt"}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                To capture a session locally, run{" "}
-                <span className="font-medium">npm run automation:login</span>.
+                Um lokal eine Session zu erfassen, führe{" "}
+                <span className="font-medium">npm run automation:login</span> aus.
               </p>
+              <ApiManager />
             </CardContent>
           </Card>
 

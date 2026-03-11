@@ -201,8 +201,8 @@ export function updateAssistantSettings(input: Partial<AssistantSettings>) {
 
 export function getAutomationStatus(): AutomationStatus {
   const storagePath =
-    fromEnv(process.env.TS_AUTOMATION_STORAGE) ??
-    path.join(process.cwd(), "data", "automation", "storage.json");
+    fromEnv(process.env.TRADESECURE_SESSION_PATH) ??
+    path.join(process.cwd(), ".local", "session.json");
   return {
     hasSession: fs.existsSync(storagePath),
     storagePath,
