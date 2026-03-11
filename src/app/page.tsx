@@ -46,6 +46,11 @@ export default function Home() {
   const assistantSettings = getAssistantSettingsSafe();
   const loginEnabled = Boolean(process.env.DASHBOARD_PASSWORD);
   const automationStatus = getAutomationStatus();
+  const assistantNeedsKey =
+    assistantSettings.provider === "openai" ||
+    assistantSettings.provider === "openrouter" ||
+    (assistantSettings.provider === "ollama" &&
+      Boolean(assistantSettings.baseUrl?.includes("ollama.com")));
 
   return (
     <div className="min-h-screen px-6 py-10 lg:px-10">
@@ -340,7 +345,9 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <AssistantChat />
-              {!assistantSettings.hasApiKey && assistantSettings.mode !== "mock" ? (
+              {!assistantSettings.hasApiKey &&
+              assistantNeedsKey &&
+              assistantSettings.mode !== "mock" ? (
                 <p className="mt-3 text-xs text-muted-foreground">
                   Configure an API key in Settings to enable live model responses.
                 </p>

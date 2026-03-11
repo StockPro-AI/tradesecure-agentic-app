@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   const clearApiKey = Boolean(body.clearApiKey);
 
   const nextProvider = providerRaw === "" ? undefined : providerRaw;
-  const nextModel = modelRaw === "" ? undefined : modelRaw;
+  const nextModel = modelRaw === "" ? "" : modelRaw;
   const nextBaseUrl =
     baseUrlRaw === undefined ? undefined : baseUrlRaw || null;
   const nextMode =
