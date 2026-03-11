@@ -239,13 +239,6 @@ export function SettingsDialog({
     setModel("");
   }, [provider, ollamaTarget]);
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-    void loadModels();
-  }, [open, loadModels]);
-
   const loadModels = useCallback(async () => {
     setModelsLoading(true);
     setModelsError(null);
@@ -269,6 +262,13 @@ export function SettingsDialog({
       setModelsLoading(false);
     }
   }, [model]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    void loadModels();
+  }, [open, loadModels]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
