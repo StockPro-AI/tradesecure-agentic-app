@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -188,6 +188,19 @@ type AssistantSettingsSnapshot = {
   mode: string;
 };
 
+const providerOptions = [
+  { value: "ollama", label: "Ollama (Local/Cloud)" },
+  { value: "openrouter", label: "OpenRouter" },
+  { value: "openai", label: "OpenAI" },
+];
+
+const baseUrlMap: Record<string, string> = {
+  openai: "https://api.openai.com/v1",
+  openrouter: "https://openrouter.ai/api/v1",
+  ollama: "http://localhost:11434",
+  "ollama-cloud": "https://ollama.com",
+};
+
 export function SettingsDialog({
   initial,
   loginEnabled = false,
@@ -203,6 +216,59 @@ export function SettingsDialog({
   const [mode, setMode] = useState(initial.mode);
   const [apiKey, setApiKey] = useState("");
   const [hasApiKey, setHasApiKey] = useState(initial.hasApiKey);
+  const [models, setModels] = useState<string[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsError, setModelsError] = useState<string | null>(null);
+  const [ollamaTarget, setOllamaTarget] = useState(
+    initial.baseUrl?.includes("ollama.com") ? "cloud" : "local"
+  );
+
+  useEffect(() => {
+    if (provider !== "ollama") {
+      setBaseUrl(baseUrlMap[provider] ?? "");
+    } else {
+      setBaseUrl(
+        ollamaTarget === "cloud" ? baseUrlMap["ollama-cloud"] : baseUrlMap.ollama
+      );
+    }
+  }, [provider, ollamaTarget]);
+
+  useEffect(() => {
+    setModels([]);
+    setModelsError(null);
+    setModel("");
+  }, [provider, ollamaTarget]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    void loadModels();
+  }, [open, loadModels]);
+
+  const loadModels = useCallback(async () => {
+    setModelsLoading(true);
+    setModelsError(null);
+    try {
+      const res = await fetch("/api/models", { cache: "no-store" });
+      const payload = await res.json();
+      if (!res.ok || !payload.ok) {
+        setModels([]);
+        setModelsError(payload?.error ?? "Failed to load models.");
+        return;
+      }
+      const nextModels = Array.isArray(payload.models) ? payload.models : [];
+      setModels(nextModels);
+      if (nextModels.length > 0 && !nextModels.includes(model)) {
+        setModel(nextModels[0]);
+      }
+    } catch (error) {
+      setModels([]);
+      setModelsError(error instanceof Error ? error.message : "Failed to load models.");
+    } finally {
+      setModelsLoading(false);
+    }
+  }, [model]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -216,12 +282,38 @@ export function SettingsDialog({
         <div className="grid gap-4 text-sm">
           <div className="grid gap-2">
             <span className="text-xs text-muted-foreground">Provider</span>
-            <Input
+            <select
+              className="h-9 rounded-md border border-border bg-background px-3 text-sm"
               value={provider}
               onChange={(event) => setProvider(event.target.value)}
-              placeholder="openai"
-            />
+            >
+              {providerOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
+          {provider === "ollama" ? (
+            <div className="grid gap-2">
+              <span className="text-xs text-muted-foreground">Ollama Base URL</span>
+              <select
+                className="h-9 rounded-md border border-border bg-background px-3 text-sm"
+                value={ollamaTarget}
+                onChange={(event) => setOllamaTarget(event.target.value)}
+              >
+                <option value="local">Local (http://localhost:11434)</option>
+                <option value="cloud">Cloud (https://ollama.com)</option>
+              </select>
+            </div>
+          ) : (
+            <div className="grid gap-2">
+              <span className="text-xs text-muted-foreground">Base URL</span>
+              <div className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs">
+                {baseUrl}
+              </div>
+            </div>
+          )}
           <div className="grid gap-2">
             <span className="text-xs text-muted-foreground">Mode</span>
             <Tabs value={mode} onValueChange={(value) => setMode(value)}>
@@ -234,19 +326,42 @@ export function SettingsDialog({
           </div>
           <div className="grid gap-2">
             <span className="text-xs text-muted-foreground">Model</span>
-            <Input
-              value={model}
-              onChange={(event) => setModel(event.target.value)}
-              placeholder="gpt-4o-mini"
-            />
-          </div>
-          <div className="grid gap-2">
-            <span className="text-xs text-muted-foreground">Base URL (optional)</span>
-            <Input
-              value={baseUrl}
-              onChange={(event) => setBaseUrl(event.target.value)}
-              placeholder="https://api.openai.com/v1"
-            />
+            <div className="flex items-center gap-2">
+              <select
+                className="h-9 flex-1 rounded-md border border-border bg-background px-3 text-sm"
+                value={model}
+                onChange={(event) => setModel(event.target.value)}
+                disabled={modelsLoading || models.length === 0}
+              >
+                {models.length === 0 ? (
+                  <option value="">
+                    {modelsLoading ? "Loading models..." : "No models detected"}
+                  </option>
+                ) : null}
+                {models.map((available) => (
+                  <option key={available} value={available}>
+                    {available}
+                  </option>
+                ))}
+              </select>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={modelsLoading}
+                onClick={loadModels}
+              >
+                {modelsLoading ? "Refreshing..." : "Refresh"}
+              </Button>
+            </div>
+            {modelsError ? (
+              <span className="text-xs text-rose-600">{modelsError}</span>
+            ) : (
+              <span className="text-xs text-muted-foreground">
+                {models.length > 0
+                  ? `${models.length} models detected`
+                  : "Save settings and refresh to detect models."}
+              </span>
+            )}
           </div>
           <div className="grid gap-2">
             <span className="text-xs text-muted-foreground">API Key</span>
@@ -257,6 +372,9 @@ export function SettingsDialog({
               placeholder={hasApiKey ? "Stored (enter to replace)" : "sk-..."}
             />
             <span className="text-xs text-muted-foreground">
+              {provider === "ollama" && ollamaTarget === "local"
+                ? "Optional for local Ollama."
+                : "Required for cloud providers."}{" "}
               Mode: {mode}
             </span>
           </div>
@@ -314,6 +432,7 @@ export function SettingsDialog({
                   setHasApiKey(true);
                   setApiKey("");
                 }
+                await loadModels();
                 setOpen(false);
               })
             }

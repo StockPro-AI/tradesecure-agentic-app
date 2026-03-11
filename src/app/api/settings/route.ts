@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  getAssistantSettingsSafe,
-  updateAssistantSettings,
-} from "@/lib/store";
+import { getAssistantSettingsSafe, updateAssistantSettings } from "@/lib/store";
 
 export const runtime = "nodejs";
 
@@ -23,15 +20,21 @@ export async function POST(req: Request) {
     typeof body.mode === "string" ? body.mode.trim().toLowerCase() : undefined;
   const clearApiKey = Boolean(body.clearApiKey);
 
+  const nextProvider = providerRaw === "" ? undefined : providerRaw;
+  const nextModel = modelRaw === "" ? undefined : modelRaw;
+  const nextBaseUrl =
+    baseUrlRaw === undefined ? undefined : baseUrlRaw || null;
+  const nextMode =
+    modeRaw === "mock" || modeRaw === "auto" || modeRaw === "live"
+      ? modeRaw
+      : undefined;
+
   updateAssistantSettings({
-    provider: providerRaw === "" ? undefined : providerRaw,
-    model: modelRaw === "" ? undefined : modelRaw,
-    base_url: baseUrlRaw === undefined ? undefined : baseUrlRaw || null,
+    provider: nextProvider,
+    model: nextModel,
+    base_url: nextBaseUrl,
     api_key: clearApiKey ? null : apiKeyRaw,
-    mode:
-      modeRaw === "mock" || modeRaw === "auto" || modeRaw === "live"
-        ? modeRaw
-        : undefined,
+    mode: nextMode,
   });
 
   return NextResponse.json(getAssistantSettingsSafe());

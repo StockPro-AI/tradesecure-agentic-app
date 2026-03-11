@@ -1,4 +1,6 @@
 import { randomUUID, createHash } from "crypto";
+import fs from "fs";
+import path from "path";
 import { db } from "./db";
 
 export type MarketRow = {
@@ -69,6 +71,11 @@ export type AssistantSettingsSafe = {
   mode: string;
 };
 
+export type AutomationStatus = {
+  hasSession: boolean;
+  storagePath: string;
+};
+
 const nowIso = () => new Date().toISOString();
 const assistantSettingKeys = {
   provider: "assistant.provider",
@@ -76,6 +83,19 @@ const assistantSettingKeys = {
   baseUrl: "assistant.base_url",
   apiKey: "assistant.api_key",
   mode: "assistant.mode",
+};
+const defaultBaseUrls: Record<string, string> = {
+  openai: "https://api.openai.com/v1",
+  openrouter: "https://openrouter.ai/api/v1",
+  ollama: "http://localhost:11434",
+};
+
+const fromEnv = (value?: string | null) => {
+  if (!value) {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
 };
 
 function getSettingValue(key: string) {
@@ -99,27 +119,41 @@ function setSettingValue(key: string, value: string | null) {
 }
 
 export function getAssistantSettings(): AssistantSettings {
+  const provider =
+    getSettingValue(assistantSettingKeys.provider) ??
+    fromEnv(process.env.TS_ASSISTANT_PROVIDER) ??
+    "ollama";
+  const model =
+    getSettingValue(assistantSettingKeys.model) ??
+    fromEnv(process.env.TS_ASSISTANT_MODEL) ??
+    "";
+  const baseUrl =
+    getSettingValue(assistantSettingKeys.baseUrl) ??
+    fromEnv(process.env.TS_ASSISTANT_BASE_URL) ??
+    defaultBaseUrls[provider] ??
+    null;
+  const apiKey =
+    getSettingValue(assistantSettingKeys.apiKey) ??
+    fromEnv(process.env.TS_ASSISTANT_API_KEY) ??
+    (provider === "openai"
+      ? fromEnv(process.env.OPENAI_API_KEY)
+      : null) ??
+    (provider === "openrouter"
+      ? fromEnv(process.env.OPENROUTER_API_KEY)
+      : null) ??
+    (provider === "ollama" ? fromEnv(process.env.OLLAMA_API_KEY) : null) ??
+    null;
+  const mode =
+    getSettingValue(assistantSettingKeys.mode) ??
+    fromEnv(process.env.TS_ASSISTANT_MODE) ??
+    "auto";
+
   return {
-    provider:
-      getSettingValue(assistantSettingKeys.provider) ??
-      process.env.TS_ASSISTANT_PROVIDER ??
-      "openai",
-    model:
-      getSettingValue(assistantSettingKeys.model) ??
-      process.env.TS_ASSISTANT_MODEL ??
-      "gpt-4o-mini",
-    base_url:
-      getSettingValue(assistantSettingKeys.baseUrl) ??
-      process.env.TS_ASSISTANT_BASE_URL ??
-      null,
-    api_key:
-      getSettingValue(assistantSettingKeys.apiKey) ??
-      process.env.OPENAI_API_KEY ??
-      null,
-    mode:
-      getSettingValue(assistantSettingKeys.mode) ??
-      process.env.TS_ASSISTANT_MODE ??
-      "auto",
+    provider,
+    model,
+    base_url: baseUrl,
+    api_key: apiKey,
+    mode,
   };
 }
 
@@ -143,6 +177,11 @@ export function updateAssistantSettings(input: Partial<AssistantSettings>) {
   }
   if (input.base_url !== undefined) {
     setSettingValue(assistantSettingKeys.baseUrl, input.base_url);
+  } else if (input.provider !== undefined) {
+    const fallback = defaultBaseUrls[input.provider];
+    if (fallback) {
+      setSettingValue(assistantSettingKeys.baseUrl, fallback);
+    }
   }
   if (input.api_key !== undefined) {
     setSettingValue(assistantSettingKeys.apiKey, input.api_key);
@@ -158,6 +197,16 @@ export function updateAssistantSettings(input: Partial<AssistantSettings>) {
     apiKeyUpdated: input.api_key ? true : undefined,
     mode: input.mode,
   });
+}
+
+export function getAutomationStatus(): AutomationStatus {
+  const storagePath =
+    fromEnv(process.env.TS_AUTOMATION_STORAGE) ??
+    path.join(process.cwd(), "data", "automation", "storage.json");
+  return {
+    hasSession: fs.existsSync(storagePath),
+    storagePath,
+  };
 }
 
 export function logEvent(

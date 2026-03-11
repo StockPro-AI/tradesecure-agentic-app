@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getDashboardData } from "@/lib/store";
+import { getAssistantSettingsSafe, getAutomationStatus, getDashboardData } from "@/lib/store";
 import {
   ApproveExecutionButton,
   CreateStrategyForm,
@@ -12,7 +12,6 @@ import {
   SnapshotButton,
 } from "@/components/dashboard/actions";
 import { AssistantChat } from "@/components/dashboard/assistant-chat";
-import { getAssistantSettingsSafe } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -46,6 +45,7 @@ export default function Home() {
   const latestSnapshot = dashboard.market[0]?.captured_at ?? "No snapshot yet";
   const assistantSettings = getAssistantSettingsSafe();
   const loginEnabled = Boolean(process.env.DASHBOARD_PASSWORD);
+  const automationStatus = getAutomationStatus();
 
   return (
     <div className="min-h-screen px-6 py-10 lg:px-10">
@@ -63,7 +63,6 @@ export default function Home() {
         <div className="flex flex-wrap items-center gap-3">
           <SnapshotButton />
           <QueueTradeDialog />
-          <SettingsDialog initial={assistantSettings} loginEnabled={loginEnabled} />
         </div>
       </header>
 
@@ -257,6 +256,60 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col gap-6">
+          <Card className="bg-white/85">
+            <CardHeader>
+              <CardTitle>TradeSecure Login</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+                <span>Webtrader</span>
+                <a
+                  className="rounded-md bg-black px-3 py-1 text-xs text-white"
+                  href="https://webtrader.tradesecure.io/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open Login
+                </a>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+                <span>Automation Session</span>
+                <Badge variant={automationStatus.hasSession ? "secondary" : "outline"}>
+                  {automationStatus.hasSession ? "Captured" : "Missing"}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                To capture a session locally, run{" "}
+                <span className="font-medium">npm run automation:login</span>.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/85">
+            <CardHeader>
+              <CardTitle>Model Control</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+                <div className="flex items-center justify-between">
+                  <span>Provider</span>
+                  <span className="text-xs font-semibold uppercase">
+                    {assistantSettings.provider}
+                  </span>
+                </div>
+                <div className="mt-1 flex items-center justify-between">
+                  <span>Model</span>
+                  <span className="text-xs">{assistantSettings.model || "Not set"}</span>
+                </div>
+                <div className="mt-1 flex items-center justify-between">
+                  <span>Mode</span>
+                  <span className="text-xs uppercase">{assistantSettings.mode}</span>
+                </div>
+              </div>
+              <SettingsDialog initial={assistantSettings} loginEnabled={loginEnabled} />
+            </CardContent>
+          </Card>
+
           <Card className="bg-white/85">
             <CardHeader>
               <CardTitle>Agent Status</CardTitle>
