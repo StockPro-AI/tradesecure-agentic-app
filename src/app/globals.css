@@ -96,37 +96,37 @@
 }
 
 .dark {
-  --background: oklch(0.14 0.02 40);
-  --foreground: oklch(0.98 0.02 96);
-  --card: oklch(0.2 0.03 40);
-  --card-foreground: oklch(0.98 0.02 96);
-  --popover: oklch(0.2 0.03 40);
-  --popover-foreground: oklch(0.98 0.02 96);
-  --primary: oklch(0.78 0.12 210);
-  --primary-foreground: oklch(0.16 0.02 40);
-  --secondary: oklch(0.28 0.04 60);
-  --secondary-foreground: oklch(0.98 0.02 96);
-  --muted: oklch(0.26 0.03 60);
-  --muted-foreground: oklch(0.7 0.03 75);
-  --accent: oklch(0.4 0.12 80);
-  --accent-foreground: oklch(0.98 0.02 96);
-  --destructive: oklch(0.62 0.21 26);
+  --background: oklch(0.13 0.03 250);
+  --foreground: oklch(0.96 0.02 250);
+  --card: oklch(0.2 0.04 250 / 65%);
+  --card-foreground: oklch(0.96 0.02 250);
+  --popover: oklch(0.2 0.04 250 / 70%);
+  --popover-foreground: oklch(0.96 0.02 250);
+  --primary: oklch(0.78 0.17 200);
+  --primary-foreground: oklch(0.16 0.02 250);
+  --secondary: oklch(0.22 0.04 250);
+  --secondary-foreground: oklch(0.95 0.02 250);
+  --muted: oklch(0.22 0.03 250 / 70%);
+  --muted-foreground: oklch(0.7 0.03 250);
+  --accent: oklch(0.68 0.15 160);
+  --accent-foreground: oklch(0.13 0.03 250);
+  --destructive: oklch(0.62 0.22 25);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 18%);
-  --ring: oklch(0.68 0.08 210);
-  --chart-1: oklch(0.62 0.17 220);
-  --chart-2: oklch(0.74 0.12 135);
-  --chart-3: oklch(0.7 0.16 40);
-  --chart-4: oklch(0.58 0.15 280);
-  --chart-5: oklch(0.7 0.14 10);
-  --sidebar: oklch(0.2 0.03 40);
-  --sidebar-foreground: oklch(0.98 0.02 96);
-  --sidebar-primary: oklch(0.78 0.12 210);
-  --sidebar-primary-foreground: oklch(0.16 0.02 40);
-  --sidebar-accent: oklch(0.28 0.04 60);
-  --sidebar-accent-foreground: oklch(0.98 0.02 96);
+  --ring: oklch(0.65 0.12 200);
+  --chart-1: oklch(0.68 0.16 210);
+  --chart-2: oklch(0.74 0.15 155);
+  --chart-3: oklch(0.72 0.16 45);
+  --chart-4: oklch(0.64 0.14 185);
+  --chart-5: oklch(0.76 0.16 120);
+  --sidebar: oklch(0.18 0.03 250 / 80%);
+  --sidebar-foreground: oklch(0.96 0.02 250);
+  --sidebar-primary: oklch(0.78 0.17 200);
+  --sidebar-primary-foreground: oklch(0.16 0.02 250);
+  --sidebar-accent: oklch(0.26 0.04 250);
+  --sidebar-accent-foreground: oklch(0.96 0.02 250);
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.68 0.08 210);
+  --sidebar-ring: oklch(0.65 0.12 200);
 }
 
 @layer base {
@@ -135,22 +135,70 @@
   }
   body {
     @apply bg-background text-foreground;
+    position: relative;
     background-image: radial-gradient(
-        900px 400px at 8% -10%,
-        oklch(0.94 0.08 85 / 50%),
+        1200px 600px at 10% -10%,
+        oklch(0.32 0.12 200 / 35%),
         transparent 60%
       ),
       radial-gradient(
-        700px 340px at 92% -5%,
-        oklch(0.86 0.06 210 / 55%),
+        900px 520px at 90% 0%,
+        oklch(0.28 0.16 160 / 35%),
         transparent 55%
       ),
-      linear-gradient(120deg, oklch(0.99 0.01 96), oklch(0.97 0.02 92));
+      radial-gradient(
+        800px 600px at 50% 90%,
+        oklch(0.22 0.08 245 / 40%),
+        transparent 60%
+      );
     background-attachment: fixed;
+  }
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  body::before {
+    background: conic-gradient(
+      from 130deg at 20% 20%,
+      oklch(0.4 0.16 200 / 45%),
+      transparent 35%,
+      oklch(0.36 0.14 160 / 35%),
+      transparent 60%
+    );
+    filter: blur(90px) saturate(140%);
+    opacity: 0.7;
+    mix-blend-mode: screen;
+  }
+
+  body::after {
+    background: radial-gradient(
+      600px 420px at 70% 20%,
+      oklch(0.45 0.18 220 / 35%),
+      transparent 70%
+    );
+    filter: blur(80px);
+    opacity: 0.45;
+    mix-blend-mode: lighten;
   }
   html {
     @apply font-sans;
   }
+}
+
+.glass-panel {
+  background: linear-gradient(
+    135deg,
+    oklch(0.22 0.04 250 / 65%),
+    oklch(0.18 0.03 250 / 45%)
+  );
+  border: 1px solid oklch(1 0 0 / 12%);
+  box-shadow: 0 30px 70px oklch(0 0 0 / 40%);
+  backdrop-filter: blur(18px);
 }
 
 .c1-chat,

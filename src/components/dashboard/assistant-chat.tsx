@@ -4,8 +4,8 @@ import { C1Chat, ThemeProvider } from "@thesysai/genui-sdk";
 
 export function AssistantChat() {
   return (
-    <ThemeProvider mode="light">
-      <div className="h-[520px] w-full rounded-2xl border border-border/60 bg-white/70 shadow-sm backdrop-blur">
+    <ThemeProvider mode="dark">
+      <div className="glass-panel h-[520px] w-full rounded-2xl border border-white/10 shadow-[0_24px_50px_rgba(0,0,0,0.45)]">
         <C1Chat
           apiUrl="/api/assistant/ask"
           formFactor="side-panel"

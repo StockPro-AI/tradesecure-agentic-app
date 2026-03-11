@@ -56,7 +56,9 @@ export default function Home() {
     <div className="min-h-screen px-6 py-10 lg:px-10">
       <header className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-3">
-          <Badge className="w-fit bg-black text-white">Demo Control Room</Badge>
+          <Badge className="w-fit bg-white/10 text-white ring-1 ring-white/20">
+            Demo Control Room
+          </Badge>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">
             TradeSecure Agentic Control
           </h1>
@@ -74,13 +76,13 @@ export default function Home() {
       <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-6">
           <div className="grid gap-4 md:grid-cols-3">
-            <Card className="bg-white/70">
+            <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground">Pending Approvals</CardTitle>
               </CardHeader>
               <CardContent className="text-2xl font-semibold">{pendingApprovals}</CardContent>
             </Card>
-            <Card className="bg-white/70">
+            <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground">Active Strategies</CardTitle>
               </CardHeader>
@@ -88,7 +90,7 @@ export default function Home() {
                 {dashboard.strategies.length}
               </CardContent>
             </Card>
-            <Card className="bg-white/70">
+            <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground">Last Snapshot</CardTitle>
               </CardHeader>
@@ -96,7 +98,7 @@ export default function Home() {
             </Card>
           </div>
 
-          <Card className="bg-white/80">
+          <Card>
             <CardHeader>
               <CardTitle>Market Monitor</CardTitle>
             </CardHeader>
@@ -136,7 +138,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80">
+          <Card>
             <CardHeader>
               <CardTitle>Strategy Factory</CardTitle>
             </CardHeader>
@@ -151,7 +153,7 @@ export default function Home() {
                 {dashboard.strategies.map((strategy) => (
                   <div
                     key={strategy.id}
-                    className="rounded-xl border border-border/60 bg-white/70 p-4"
+                    className="glass-panel rounded-2xl p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div>
@@ -168,7 +170,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80">
+          <Card>
             <CardHeader>
               <CardTitle>Execution Queue</CardTitle>
             </CardHeader>
@@ -215,7 +217,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-          <Card className="bg-white/80">
+          <Card>
             <CardHeader>
               <CardTitle>Backtest Runs</CardTitle>
             </CardHeader>
@@ -230,7 +232,7 @@ export default function Home() {
                   return (
                     <div
                       key={run.id}
-                      className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border/50 bg-white/70 p-4 text-sm"
+                      className="glass-panel flex flex-wrap items-center justify-between gap-4 rounded-2xl p-4 text-sm"
                     >
                       <div className="flex flex-col">
                         <span className="text-xs uppercase text-muted-foreground">
@@ -261,15 +263,15 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col gap-6">
-          <Card className="bg-white/85">
+          <Card>
             <CardHeader>
               <CardTitle>TradeSecure Login</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2">
                 <span>Webtrader</span>
                 <a
-                  className="rounded-md bg-black px-3 py-1 text-xs text-white"
+                  className="rounded-md bg-white/10 px-3 py-1 text-xs text-white ring-1 ring-white/20 transition hover:bg-white/20"
                   href="https://webtrader.tradesecure.io/"
                   target="_blank"
                   rel="noreferrer"
@@ -277,7 +279,7 @@ export default function Home() {
                   Open Login
                 </a>
               </div>
-              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2">
                 <span>Automation Session</span>
                 <Badge variant={automationStatus.hasSession ? "secondary" : "outline"}>
                   {automationStatus.hasSession ? "Captured" : "Missing"}
@@ -290,12 +292,12 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/85">
+          <Card>
             <CardHeader>
               <CardTitle>Model Control</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <div className="rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+              <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
                 <div className="flex items-center justify-between">
                   <span>Provider</span>
                   <span className="text-xs font-semibold uppercase">
@@ -315,31 +317,31 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/85">
+          <Card>
             <CardHeader>
               <CardTitle>Agent Status</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2">
                 <span>Market Watcher</span>
                 <Badge variant="secondary">Running</Badge>
               </div>
-              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2">
                 <span>Strategy Factory</span>
                 <Badge variant="outline">Idle</Badge>
               </div>
-              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2">
                 <span>Execution Agent</span>
                 <Badge variant="secondary">Awaiting Approval</Badge>
               </div>
-              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-white/70 px-3 py-2">
+              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2">
                 <span>Risk Guardian</span>
                 <Badge className="bg-black text-white">On Watch</Badge>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/85">
+          <Card>
             <CardHeader>
               <CardTitle>Assistant Console</CardTitle>
             </CardHeader>
@@ -355,7 +357,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/85">
+          <Card>
             <CardHeader>
               <CardTitle>Event Stream</CardTitle>
             </CardHeader>
