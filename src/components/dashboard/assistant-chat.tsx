@@ -10,7 +10,7 @@ export function AssistantChat() {
           apiUrl="/api/assistant/ask"
           formFactor="side-panel"
           agentName={process.env.NEXT_PUBLIC_AGENT_NAME ?? "Ops Supervisor"}
-          logoUrl={process.env.NEXT_PUBLIC_AGENT_LOGO_URL ?? ""}
+          logoUrl={process.env.NEXT_PUBLIC_AGENT_LOGO_URL || undefined}
           conversationStarters={{
             variant: "short",
             options: [
